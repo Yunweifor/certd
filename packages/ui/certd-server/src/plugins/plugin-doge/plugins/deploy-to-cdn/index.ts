@@ -1,0 +1,90 @@
+import { AbstractTaskPlugin, IsTaskPlugin, pluginGroups, RunStrategy, TaskInput } from '@certd/pipeline';
+import { CertInfo } from '@certd/plugin-cert';
+import { DogeClient } from '../../lib/index.js';
+import dayjs from 'dayjs';
+import { CertApplyPluginNames} from '@certd/plugin-cert';
+@IsTaskPlugin({
+  name: 'DogeCloudDeployToCDN',
+  title: '多吉云-部署到多吉云CDN',
+  icon: 'svg:icon-dogecloud',
+  group: pluginGroups.cdn.key,
+  default: {
+    strategy: {
+      runStrategy: RunStrategy.SkipWhenSucceed,
+    },
+  },
+})
+export class DogeCloudDeployToCDNPlugin extends AbstractTaskPlugin {
+  @TaskInput({
+    title: '域名',
+    helper: 'CDN域名',
+    required: true,
+  })
+  domain!: string;
+  //证书选择，此项必须要有
+  @TaskInput({
+    title: '证书',
+    helper: '请选择前置任务输出的域名证书',
+    component: {
+      name: 'output-selector',
+      from: [...CertApplyPluginNames],
+    },
+    required: true,
+  })
+  cert!: CertInfo;
+
+  //授权选择框
+  @TaskInput({
+    title: '多吉云授权',
+    helper: '多吉云AccessKey',
+    component: {
+      name: 'access-selector',
+      type: 'dogecloud',
+    },
+    rules: [{ required: true, message: '此项必填' }],
+  })
+  accessId!: string;
+
+  @TaskInput({
+    title: '忽略部署接口报错',
+    helper: '当该域名部署后报错，但是实际上已经部署成功时，可以勾选',
+    value: false,
+    component: {
+      name: 'a-switch',
+      type: 'checked',
+    },
+  })
+  ignoreDeployNullCode = false;
+
+  dogeClient!: DogeClient;
+
+  async onInstance() {
+    const access = await this.getAccess(this.accessId);
+    this.dogeClient = new DogeClient(access, this.ctx.http);
+  }
+  async execute(): Promise<void> {
+    const certId: number = await this.updateCert();
+    await this.bindCert(certId);
+  }
+
+  async updateCert() {
+    const data = await this.dogeClient.request('/cdn/cert/upload.json', {
+      note: 'certd-' + dayjs().format('YYYYMMDDHHmmss'),
+      cert: this.cert.crt,
+      private: this.cert.key,
+    });
+    return data.id;
+  }
+
+  async bindCert(certId: number) {
+    await this.dogeClient.request(
+      '/cdn/cert/bind.json',
+      {
+        id: certId,
+        domain: this.domain,
+      },
+      this.ignoreDeployNullCode
+    );
+  }
+}
+new DogeCloudDeployToCDNPlugin();

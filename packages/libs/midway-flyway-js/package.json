@@ -1,0 +1,50 @@
+{
+  "name": "@certd/midway-flyway-js",
+  "version": "1.36.5",
+  "description": "midway with flyway, sql upgrade way ",
+  "private": false,
+  "type": "module",
+  "module": "./dist/index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "before-build": "rimraf dist && rimraf tsconfig.tsbuildinfo && rimraf .rollup.cache",
+    "build": "npm run before-build && tsc --skipLibCheck",
+    "dev-build": "npm run build",
+    "test": "midway-bin test --ts -V",
+    "test1": "midway-bin test --ts -V -f test/blank.test.ts -t 'hash-check'",
+    "cov": "midway-bin cov --ts",
+    "prepublish": "npm run build",
+    "pub": "npm publish"
+  },
+  "keywords": [],
+  "author": "greper",
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@midwayjs/core": "~3.20.3",
+    "@midwayjs/logger": "~3.4.2",
+    "@midwayjs/typeorm": "~3.20.3",
+    "better-sqlite3": "^11.1.2"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.3",
+    "@types/node": "^18",
+    "@typescript-eslint/eslint-plugin": "^8.26.1",
+    "@typescript-eslint/parser": "^8.26.1",
+    "eslint": "^8.24.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.8",
+    "rimraf": "^5.0.5",
+    "tslib": "^2.8.1",
+    "typeorm": "^0.3.11",
+    "typescript": "^5.4.2"
+  },
+  "gitHead": "0ff700849ff6427f79cce241f92257eca35af65d"
+}
