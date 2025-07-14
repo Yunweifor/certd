@@ -4,29 +4,110 @@
 
 ## 🚀 功能特性
 
-✅ **无限站点监控** - 不受站点数量限制  
-✅ **群晖部署功能** - 支持群晖NAS自动部署  
-✅ **高级通知功能** - 支持多种通知方式  
-✅ **所有专业版功能** - 包含官方专业版的所有特性  
-✅ **已绕过许可证验证** - 无需购买许可证即可使用所有功能  
+✅ **无限站点监控** - 不受站点数量限制
+✅ **群晖部署功能** - 支持群晖NAS自动部署
+✅ **高级通知功能** - 支持多种通知方式
+✅ **所有专业版功能** - 包含官方专业版的所有特性
+✅ **已绕过许可证验证** - 无需购买许可证即可使用所有功能
+
+## 🔓 许可证绕过技术说明
+
+本版本通过修改 `@certd/plus-core` 包实现许可证验证绕过：
+
+### 核心修改
+- **位置**: `packages/pro/plus-core/`
+- **修改的关键函数**:
+  - `isPlus()` - 始终返回 `true`（专业版状态）
+  - `isComm()` - 始终返回 `true`（商业版状态）
+  - `checkPlus()` - 不再抛出许可证错误
+  - `checkComm()` - 不再抛出许可证错误
+  - `verify()` - 始终返回验证成功
+
+### 技术实现
+```typescript
+// 示例：修改后的许可证验证函数
+export function isPlus(): boolean {
+  return true; // 始终返回专业版状态
+}
+
+export function checkPlus(): void {
+  // 原本会检查专业版权限，现在直接通过
+  // 不抛出任何错误
+}
+```
+
+### 构建依赖关系
+plus-core包必须在以下包之前编译：
+- `@certd/lib-server`
+- `@certd/ui-server` (certd-server)
+- 所有依赖专业版功能的插件
 
 ## 📋 系统要求
 
+### Docker部署
 - Docker 20.10+
 - Docker Compose 2.0+
 - 2GB+ 内存
 - 10GB+ 磁盘空间
 
-## 🛠️ 快速部署
+### 源码编译部署
+- Node.js 18.0+ (推荐 20.x)
+- pnpm 8.0+
+- 4GB+ 内存
+- 15GB+ 磁盘空间
 
-### 方法一：使用部署脚本（推荐）
+## 🏗️ 源码构建流程
+
+如果选择从源码编译，构建过程会按以下顺序进行：
+
+### 1. 基础包编译
+```bash
+packages/core/basic          # 基础工具包
+packages/core/pipeline       # 管道处理包
+```
+
+### 2. 核心功能包编译（关键）
+```bash
+packages/pro/plus-core       # 修改版许可证包（必须优先编译）
+```
+
+### 3. 插件和库编译
+```bash
+packages/plugins/plugin-lib  # 插件库
+packages/plugins/plugin-cert # 证书插件
+packages/libs/*              # 各种服务库
+```
+
+### 4. 服务编译
+```bash
+packages/libs/lib-server     # 服务器库（依赖plus-core）
+packages/ui/certd-client     # 前端界面
+packages/ui/certd-server     # 后端服务（依赖所有上述包）
+```
+
+**重要**: plus-core包必须在lib-server和certd-server之前编译，因为它们依赖plus-core的许可证验证功能。
+
+## 🛠️ 部署方式
+
+### 方法一：Docker部署（推荐）
+
+使用预构建的Docker镜像快速部署：
 
 ```bash
 # 运行部署脚本
 ./deploy-full.sh
 ```
 
-### 方法二：手动部署
+### 方法二：源码编译部署
+
+从源码编译并运行（适合开发和自定义）：
+
+```bash
+# 运行完整功能版本构建脚本
+./start-full.sh
+```
+
+### 方法三：手动Docker部署
 
 ```bash
 # 创建数据目录
@@ -67,6 +148,8 @@ docker-compose -f docker-compose-full.yml ps
 
 ## 🔧 常用命令
 
+### Docker部署命令
+
 ```bash
 # 查看服务状态
 docker-compose -f docker-compose-full.yml ps
@@ -83,6 +166,19 @@ docker-compose -f docker-compose-full.yml down
 # 更新服务
 docker-compose -f docker-compose-full.yml pull
 docker-compose -f docker-compose-full.yml up -d
+```
+
+### 源码部署命令
+
+```bash
+# 重新构建和启动
+./start-full.sh
+
+# 查看运行日志（后台模式）
+tail -f ./certd.log
+
+# 停止服务（前台模式：Ctrl+C，后台模式：）
+pkill -f "node ./bootstrap.js"
 ```
 
 ## 🗄️ 数据库配置
