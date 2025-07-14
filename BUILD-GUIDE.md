@@ -14,14 +14,23 @@
 - 15GB+ 磁盘空间
 
 ### 关键组件
-- **修改版plus-core包**: `packages/pro/plus-core/`
-- **许可证绕过逻辑**: 修改了核心验证函数
-- **完整依赖链**: 所有@certd包必须按正确顺序编译
+- **修改版plus-core包**: `packages/pro/plus-core/` - **核心组件，必须优先编译**
+- **许可证绕过逻辑**: 修改了核心验证函数，实现专业版功能解锁
+- **完整依赖链**: 所有@certd包必须按正确顺序编译，plus-core是关键依赖
+
+### ⚠️ 重要提醒
+**plus-core包的编译顺序至关重要**：
+- 必须在 `lib-server` 和 `certd-server` 之前编译
+- 必须在所有依赖专业版功能的插件之前编译
+- 编译失败会导致整个构建过程失败
 
 ## 🏗️ 构建流程
 
 ### 方法一：自动构建（推荐）
 
+有两个自动构建脚本可供选择：
+
+#### 选项A：简化构建脚本
 ```bash
 # 克隆仓库
 git clone https://github.com/Yunweifor/certd
@@ -30,9 +39,26 @@ cd certd
 # 切换到完整功能分支
 git checkout feature/full-featured-version
 
-# 运行自动构建脚本
+# 运行简化版构建脚本
+./start.sh
+```
+
+#### 选项B：详细构建脚本
+```bash
+# 克隆仓库
+git clone https://github.com/Yunweifor/certd
+cd certd
+
+# 切换到完整功能分支
+git checkout feature/full-featured-version
+
+# 运行详细版构建脚本
 ./start-full.sh
 ```
+
+**脚本选择建议**：
+- **start.sh**：适合快速构建，包含所有必要步骤
+- **start-full.sh**：适合调试，包含详细的状态检查和说明
 
 ### 方法二：手动构建
 
