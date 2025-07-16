@@ -87,6 +87,26 @@ else
     echo "⚠️  lib-server包不存在"
 fi
 
+# 检查其他必要的lib包
+echo ""
+echo "检查其他lib包..."
+lib_packages=(
+    "packages/libs/midway-flyway-js"
+    "packages/libs/lib-k8s"
+    "packages/libs/lib-huawei"
+    "packages/libs/lib-jdcloud"
+    "packages/libs/lib-iframe"
+    "packages/libs/lib-server"
+)
+
+for package in "${lib_packages[@]}"; do
+    if [ -d "$package" ]; then
+        echo "✅ $package 存在"
+    else
+        echo "⚠️  $package 不存在"
+    fi
+done
+
 echo ""
 echo "=========================================="
 echo "验证完成"
@@ -94,3 +114,14 @@ echo "=========================================="
 echo "如果所有检查都通过，可以运行以下命令进行构建："
 echo "  ./start.sh        # 简化版构建脚本"
 echo "  ./start-full.sh   # 详细版构建脚本"
+echo ""
+echo "构建顺序："
+echo "  1. @certd/basic"
+echo "  2. @certd/pipeline"
+echo "  3. @certd/plus-core (关键)"
+echo "  4. @certd/plugin-lib"
+echo "  5. @certd/plugin-cert"
+echo "  6. 各种lib包 (midway-flyway-js, lib-k8s, lib-huawei, lib-jdcloud, lib-iframe)"
+echo "  7. @certd/lib-server"
+echo "  8. certd-client (前端)"
+echo "  9. certd-server (后端)"
