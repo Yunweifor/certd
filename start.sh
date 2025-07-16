@@ -80,13 +80,39 @@ cd packages/plugins/plugin-cert
 npm run build
 cd ../../..
 
-# 6. 编译服务器库（依赖plus-core）
+# 6. 编译其他依赖包
+echo "📦 编译中间件包 @certd/midway-flyway-js"
+cd packages/libs/midway-flyway-js
+npm run build
+cd ../../..
+
+echo "📦 编译K8s库 @certd/lib-k8s"
+cd packages/libs/lib-k8s
+npm run build
+cd ../../..
+
+echo "📦 编译华为云库 @certd/lib-huawei"
+cd packages/libs/lib-huawei
+npm run build
+cd ../../..
+
+echo "📦 编译京东云库 @certd/lib-jdcloud"
+cd packages/libs/lib-jdcloud
+npm run build
+cd ../../..
+
+echo "📦 编译iframe库 @certd/lib-iframe"
+cd packages/libs/lib-iframe
+npm run build
+cd ../../..
+
+# 7. 编译服务器库（依赖plus-core）
 echo "📦 编译服务器库 @certd/lib-server"
 cd packages/libs/lib-server
 npm run build
 cd ../../..
 
-# 7. 编译前端
+# 8. 编译前端
 echo "📦 编译前端界面 certd-client"
 cd packages/ui/certd-client
 npm run build
@@ -94,7 +120,7 @@ echo "📋 复制前端构建产物到服务器public目录"
 cp -r dist/* ../certd-server/public/
 cd ../..
 
-# 8. 最后编译服务器（依赖所有上述包）
+# 9. 最后编译服务器（依赖所有上述包）
 echo "📦 编译后端服务 certd-server"
 cd packages/ui/certd-server
 npm run build
