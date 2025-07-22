@@ -50,65 +50,80 @@ echo "=========================================="
 # 设置内存限制
 export NODE_OPTIONS=--max-old-space-size=32768
 
-# 2. 按依赖关系编译所有包
-echo "=========================================="
-echo "📋 编译顺序说明："
-echo "1. basic (基础工具包)"
-echo "2. pipeline (管道处理包)"
-echo "3. plugin-lib (插件库)"
-echo "4. plugin-cert (证书插件)"
-echo "5. plus-core (修改版许可证包) ⭐ 关键包"
-echo "6. 各种lib包 (依赖plus-core的库)"
-echo "7. lib-server (服务器库，依赖plus-core)"
-echo "=========================================="
+# 1. 编译基础包
+echo "📦 编译基础包 @certd/basic"
+cd packages/core/basic
+npm run build
+cd ../../..
 
-echo "📦 1/7 编译基础包 @certd/basic"
-cd packages/core/basic && npm run build && cd ../../..
+# 2. 编译pipeline包
+echo "📦 编译管道包 @certd/pipeline"
+cd packages/core/pipeline
+npm run build
+cd ../../..
 
-echo "📦 2/7 编译管道包 @certd/pipeline"
-cd packages/core/pipeline && npm run build && cd ../../..
+# 3. 编译plus-core包（关键：必须在其他依赖它的包之前编译）
+echo "📦 编译完整功能包 @certd/plus-core (包含许可证绕过)"
+cd packages/pro/plus-core
+npm run build
+cd ../../..
 
-echo "📦 3/7 编译插件库 @certd/plugin-lib"
-cd packages/plugins/plugin-lib && npm run build && cd ../../..
+# 4. 编译plugin-lib包
+echo "📦 编译插件库 @certd/plugin-lib"
+cd packages/plugins/plugin-lib
+npm run build
+cd ../../..
 
-echo "📦 4/7 编译证书插件 @certd/plugin-cert"
-cd packages/plugins/plugin-cert && npm run build && cd ../../..
+# 5. 编译plugin-cert包
+echo "📦 编译证书插件 @certd/plugin-cert"
+cd packages/plugins/plugin-cert
+npm run build
+cd ../../..
 
-echo "📦 5/7 编译完整功能包 @certd/plus-core (包含许可证绕过) ⭐"
-echo "      ⚠️  关键：此包必须在lib-server之前编译"
-cd packages/pro/plus-core && npm run build && cd ../../..
+# 6. 编译其他依赖包
+echo "📦 编译中间件包 @certd/midway-flyway-js"
+cd packages/libs/midway-flyway-js
+npm run build
+cd ../../..
 
-echo "📦 6/7 编译其他依赖库包"
-echo "      编译中间件包 @certd/midway-flyway-js"
-cd packages/libs/midway-flyway-js && npm run build && cd ../../..
+echo "📦 编译K8s库 @certd/lib-k8s"
+cd packages/libs/lib-k8s
+npm run build
+cd ../../..
 
-echo "      编译K8s库 @certd/lib-k8s"
-cd packages/libs/lib-k8s && npm run build && cd ../../..
+echo "📦 编译华为云库 @certd/lib-huawei"
+cd packages/libs/lib-huawei
+npm run build
+cd ../../..
 
-echo "      编译华为云库 @certd/lib-huawei"
-cd packages/libs/lib-huawei && npm run build && cd ../../..
+echo "📦 编译京东云库 @certd/lib-jdcloud"
+cd packages/libs/lib-jdcloud
+npm run build
+cd ../../..
 
-echo "      编译京东云库 @certd/lib-jdcloud"
-cd packages/libs/lib-jdcloud && npm run build && cd ../../..
+echo "📦 编译iframe库 @certd/lib-iframe"
+cd packages/libs/lib-iframe
+npm run build
+cd ../../..
 
-echo "      编译iframe库 @certd/lib-iframe"
-cd packages/libs/lib-iframe && npm run build && cd ../../..
+# 7. 编译服务器库（依赖plus-core）
+echo "📦 编译服务器库 @certd/lib-server"
+cd packages/libs/lib-server
+npm run build
+cd ../../..
 
-echo "📦 7/7 编译服务器库 @certd/lib-server (依赖plus-core)"
-cd packages/libs/lib-server && npm run build && cd ../../..
-
-# 3. 编译前端和后端
-echo "=========================================="
-echo "📋 编译前端和后端服务"
-echo "=========================================="
-
+# 8. 编译前端
 echo "📦 编译前端界面 certd-client"
-cd packages/ui/certd-client && npm run build && cd ../..
+cd packages/ui/certd-client
+npm run build
 echo "📋 复制前端构建产物到服务器public目录"
-cp -r packages/ui/certd-client/dist/* packages/ui/certd-server/public/
+cp -r dist/* ../certd-server/public/
+cd ../..
 
-echo "📦 编译后端服务 certd-server (依赖所有上述包)"
-cd packages/ui/certd-server && npm run build && cd ../..
+# 9. 最后编译服务器（依赖所有上述包）
+echo "📦 编译后端服务 certd-server"
+cd packages/ui/certd-server
+npm run build
 
 echo "=========================================="
 echo "✅ 构建完成！"
@@ -134,5 +149,3 @@ else
   nohup npm run start > certd.log &
   echo "服务已在后台启动，日志文件: ./certd.log"
 fi
-
-

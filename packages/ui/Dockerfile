@@ -22,15 +22,9 @@ ENV LEGO_VERSION=4.22.2
 ENV LEGO_DOWNLOAD_DIR=/app/tools/lego
 RUN mkdir -p $LEGO_DOWNLOAD_DIR
 
-# 根据架构下载不同的文件
-RUN ARCH=$(uname -m) && \
-    if [ "$ARCH" = "x86_64" ]; then \
-        wget -O $LEGO_DOWNLOAD_DIR/lego_v${LEGO_VERSION}_linux_amd64.tar.gz https://github.com/go-acme/lego/releases/download/v${LEGO_VERSION}/lego_v${LEGO_VERSION}_linux_amd64.tar.gz; \
-    elif [ "$ARCH" = "aarch64" ]; then \
-        wget -O $LEGO_DOWNLOAD_DIR/lego_v${LEGO_VERSION}_linux_arm64.tar.gz https://github.com/go-acme/lego/releases/download/v${LEGO_VERSION}/lego_v${LEGO_VERSION}_linux_arm64.tar.gz; \
-    else \
-        echo "Unsupported architecture: $ARCH"; \
-    fi
+# 复制本地lego二进制文件（支持多架构）
+COPY lego-binaries/lego_v${LEGO_VERSION}_linux_amd64.tar.gz $LEGO_DOWNLOAD_DIR/
+COPY lego-binaries/lego_v${LEGO_VERSION}_linux_arm64.tar.gz $LEGO_DOWNLOAD_DIR/
 
 ENV TZ=Asia/Shanghai
 ENV NODE_ENV=production

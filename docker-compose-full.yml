@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  certd-full:
+    image: certd-full:latest
+    container_name: certd-full
+    restart: unless-stopped
+    ports:
+      - "7001:7001"  # Web界面端口
+      - "7002:7002"  # API端口
+    volumes:
+      # 数据持久化
+      - ./data:/app/data
+      # 日志持久化
+      - ./logs:/app/logs
+      # 配置文件持久化（可选）
+      - ./config:/app/config
+    environment:
+      - NODE_ENV=production
+      - MIDWAY_SERVER_ENV=production
+      - TZ=Asia/Shanghai
+      # 数据库配置（使用SQLite，数据存储在./data目录）
+      - DB_TYPE=sqlite
+      - DB_DATABASE=/app/data/db.sqlite
+      # 可选：如果需要使用MySQL/PostgreSQL
+      # - DB_TYPE=mysql
+      # - DB_HOST=mysql
+      # - DB_PORT=3306
+      # - DB_USERNAME=certd
+      # - DB_PASSWORD=your_password
+      # - DB_DATABASE=certd
+    networks:
+      - certd-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # 可选：如果需要使用MySQL数据库
+  # mysql:
+  #   image: mysql:8.0
+  #   container_name: certd-mysql
+  #   restart: unless-stopped
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=root_password
+  #     - MYSQL_DATABASE=certd
+  #     - MYSQL_USER=certd
+  #     - MYSQL_PASSWORD=your_password
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+  #   networks:
+  #     - certd-network
+
+  # 可选：如果需要使用PostgreSQL数据库
+  # postgres:
+  #   image: postgres:15
+  #   container_name: certd-postgres
+  #   restart: unless-stopped
+  #   environment:
+  #     - POSTGRES_DB=certd
+  #     - POSTGRES_USER=certd
+  #     - POSTGRES_PASSWORD=your_password
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - certd-network
+
+networks:
+  certd-network:
+    driver: bridge
